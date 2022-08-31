@@ -1,0 +1,15 @@
+record(stringin, "$(P)$(Q)GETIDN")
+{
+    field(DESC, "Query device")
+    field(SCAN, "Passive")
+    field(DTYP, "stream")
+    field(INP,  "@instronArbyTest.proto getIDN $(PORT)")
+}
+
+record(stringin, "$(P)$(Q)GETQ22")
+{
+    field(DESC, "Query device")
+    field(SCAN, "Passive")
+    field(DTYP, "stream")
+    field(INP,  "@instronArbyTest.proto getQ22 $(PORT)")
+}
