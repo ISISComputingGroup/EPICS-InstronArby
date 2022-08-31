@@ -29,8 +29,6 @@
 #include "asynInterposeCom.h"
 #include "asynInterposeEos.h"
 
-#include "arby.h"
-
 #include <epicsExport.h>
 
 #include "drvAsynInstronArby.h"
@@ -154,10 +152,20 @@ asynCommonDisconnect(void *drvPvt, asynUser *pasynUser)
     return closeConnection(pasynUser,driver,"Disconnect request");
 }
 
+
+// BOOL WINAPI Arby_SendString (int iDevice, PSTR sCommand)
+typedef BOOL (__stdcall * ArbySendString_t)(int, PSTR);
+
+// BOOL WINAPI Arby_QueryString (int iDevice, PSTR sQuery, PSTR sReply, long lRLen);
+typedef BOOL (__stdcall * ArbyQueryString_t)(int, PSTR, PSTR, long);
+
 /// write values to device
 static asynStatus writeIt(void *drvPvt, asynUser *pasynUser,
     const char *data, size_t numchars, size_t *nbytesTransfered)
 {
+	static HMODULE hArby = LoadLibrary("Arby.dll");
+    static ArbySendString_t ArbySendString = (ArbySendString_t)GetProcAddress(hArby, "Arby_SendString");
+    static ArbyQueryString_t ArbyQueryString = (ArbyQueryString_t)GetProcAddress(hArby, "Arby_QueryString");
     instronDriver_t *driver = (instronDriver_t*)drvPvt;
     asynStatus status = asynSuccess;
 	epicsTimeStamp epicsTS1, epicsTS2;
@@ -169,6 +177,7 @@ static asynStatus writeIt(void *drvPvt, asynUser *pasynUser,
                 "%s write %lu\n", driver->portName, (unsigned long)numchars);
 	epicsTimeGetCurrent(&epicsTS1);
     *nbytesTransfered = 0;
+    driver->replyData = "";
 	if (!driver->connected)
 	{
             epicsSnprintf(pasynUser->errorMessage,pasynUser->errorMessageSize,
@@ -183,18 +192,13 @@ static asynStatus writeIt(void *drvPvt, asynUser *pasynUser,
     BOOL res;
     size_t actual = numchars;
     if (data[0] == 'C') {
-        res = Arby_SendString (driver->deviceId, const_cast<char*>(data));
-        driver->replyData = "";
+        res = (*ArbySendString)(driver->deviceId, const_cast<char*>(data));
     } else {
         char reply[256];
         memset(reply, 0, sizeof(reply));
-        res = Arby_QueryString (driver->deviceId, const_cast<char*>(data), reply, sizeof(reply));
+        res = (*ArbyQueryString)(driver->deviceId, const_cast<char*>(data), reply, sizeof(reply));
         if (res) {
             driver->replyData = reply;
-        }
-        else
-        {
-            driver->replyData = "";
         }
     }
     if (res == 0)
