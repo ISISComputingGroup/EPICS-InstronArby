@@ -16,7 +16,7 @@ cd "${TOP}"
 dbLoadDatabase "dbd/instronArbyTest.dbd"
 instronArbyTest_registerRecordDeviceDriver pdbbase
 
-drvAsynInstronArbyConfigure("instron", 0)
+drvAsynInstronArbyConfigure("instron", 0, "\r\n")
 
 
 # trace flow

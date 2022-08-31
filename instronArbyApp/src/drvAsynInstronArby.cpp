@@ -46,6 +46,7 @@ typedef struct {
     asynInterface      common;
     asynInterface      octet;
     std::string        replyData;
+    std::string        fakeReadTerminator;
 } instronDriver_t;
 
 
@@ -77,6 +78,9 @@ asynCommonReport(void *drvPvt, FILE *fp, int details)
         fprintf(fp, "    deviceId %d: %sonnected\n",
                                                 driver->deviceId,
                                                 (driver->connected ? "C" : "Disc"));
+        char termChar[16];
+        epicsStrnEscapedFromRaw(termChar, sizeof(termChar), driver->fakeReadTerminator.c_str(), driver->fakeReadTerminator.size());
+        fprintf(fp, "    fakeReadTerminator: %s\n", termChar);
     }
     if (details >= 2) {
         fprintf(fp, "    Characters written: %lu\n", driver->nWriteBytes);
@@ -199,6 +203,7 @@ static asynStatus writeIt(void *drvPvt, asynUser *pasynUser,
         res = (*ArbyQueryString)(driver->deviceId, const_cast<char*>(data), reply, sizeof(reply));
         if (res) {
             driver->replyData = reply;
+            driver->replyData += driver->fakeReadTerminator;
         }
     }
     if (res == 0)
@@ -256,6 +261,7 @@ static asynStatus readIt(void *drvPvt, asynUser *pasynUser,
 
     strncpy(data, driver->replyData.c_str(), maxchars);
     size_t actual = strlen(data);
+    driver->replyData.erase(0, actual);
 		asynPrint(pasynUser, ASYN_TRACE_FLOW,
 			"read %lu from %s, return %s.\n", (unsigned long)*nbytesTransfered,
 			driver->portName,
@@ -311,6 +317,7 @@ static const struct asynCommon asynCommonMethods = {
 epicsShareFunc int
 drvAsynInstronArbyConfigure(const char *portName,
                          int deviceId, 
+                         const char* fakeReadTerminator, 
                          unsigned int priority,
                          int noAutoConnect,
                          int noProcessEos)
@@ -345,6 +352,11 @@ drvAsynInstronArbyConfigure(const char *portName,
     driver->connected = false;
     driver->deviceId = deviceId;
     driver->portName = epicsStrDup(portName);
+    if (fakeReadTerminator != NULL) {
+       char termChar[16];
+        epicsStrnRawFromEscaped(termChar, sizeof(termChar), fakeReadTerminator, strlen(fakeReadTerminator));
+        driver->fakeReadTerminator = termChar;
+    }
     driver->pasynUser = pasynManager->createAsynUser(0,0);
 
     /*
@@ -401,19 +413,20 @@ drvAsynInstronArbyConfigure(const char *portName,
 /// A name for the asyn driver instance we will create e.g. "L0" 
 static const iocshArg drvAsynInstronArbyConfigureArg0 = { "portName",iocshArgString}; 
 /// VISA resource name to connect to e.g. "GPIB0::3::INSTR" or "COM10"
-static const iocshArg drvAsynInstronArbyConfigureArg1 = { "devicId",iocshArgInt};
+static const iocshArg drvAsynInstronArbyConfigureArg1 = { "deviceId",iocshArgInt};
+static const iocshArg drvAsynInstronArbyConfigureArg2 = { "fakeReadTerminator",iocshArgString};
 /// Driver priority 
-static const iocshArg drvAsynInstronArbyConfigureArg2 = { "priority",iocshArgInt};
+static const iocshArg drvAsynInstronArbyConfigureArg3 = { "priority",iocshArgInt};
 /// Should the driver automatically connect to the device (0=yes) 
-static const iocshArg drvAsynInstronArbyConfigureArg3 = { "noAutoConnect",iocshArgInt};
+static const iocshArg drvAsynInstronArbyConfigureArg4 = { "noAutoConnect",iocshArgInt};
 /// Should the driver interpose layer be called for EOS (termination) character processing (0=yes)
 /// If you have no termination character specified to asyn, then passing 1 (=no) may improve efficiency 
-static const iocshArg drvAsynInstronArbyConfigureArg4 = { "noProcessEos",iocshArgInt};
+static const iocshArg drvAsynInstronArbyConfigureArg5 = { "noProcessEos",iocshArgInt};
 /// internal read timeout (ms) used instead of a zero timeout immediate read. Stream device will use such
 
 static const iocshArg *drvAsynInstronArbyConfigureArgs[] = {
     &drvAsynInstronArbyConfigureArg0, &drvAsynInstronArbyConfigureArg1, &drvAsynInstronArbyConfigureArg2,
-    &drvAsynInstronArbyConfigureArg3, &drvAsynInstronArbyConfigureArg4
+    &drvAsynInstronArbyConfigureArg3, &drvAsynInstronArbyConfigureArg4, &drvAsynInstronArbyConfigureArg5
 
 };
 
@@ -422,8 +435,8 @@ static const iocshFuncDef drvAsynInstronArbyConfigureFuncDef =
 
 static void drvAsynInstronArbyConfigureCallFunc(const iocshArgBuf *args)
 {
-    drvAsynInstronArbyConfigure(args[0].sval, args[1].ival, args[2].ival, args[3].ival,
-                             args[4].ival);
+    drvAsynInstronArbyConfigure(args[0].sval, args[1].ival, args[2].sval, args[3].ival,
+                             args[4].ival, args[5].ival);
 }
 
 extern "C"

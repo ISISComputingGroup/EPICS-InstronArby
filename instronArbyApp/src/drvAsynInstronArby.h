@@ -10,7 +10,8 @@ extern "C" {
 #endif  /* __cplusplus */
 
 epicsShareFunc int drvAsynInstronArbyConfigure(const char *portName,
-                         int iDevice, 
+                         int iDevice,
+                         const char* fakeReadTerminator,
                          unsigned int priority,
                          int noAutoConnect,
                          int noProcessEos);
