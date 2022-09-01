@@ -174,10 +174,6 @@ static asynStatus writeIt(void *drvPvt, asynUser *pasynUser,
 	epicsTimeStamp epicsTS1, epicsTS2;
 
     assert(driver);
-    asynPrint(pasynUser, ASYN_TRACE_FLOW,
-              "%s write.\n", driver->portName);
-    asynPrintIO(pasynUser, ASYN_TRACEIO_DRIVER, data, numchars,
-                "%s write %lu\n", driver->portName, (unsigned long)numchars);
 	epicsTimeGetCurrent(&epicsTS1);
     *nbytesTransfered = 0;
     driver->replyData = "";
@@ -199,9 +195,10 @@ static asynStatus writeIt(void *drvPvt, asynUser *pasynUser,
     } else {
         char reply[256];
         memset(reply, 0, sizeof(reply));
-        res = (*ArbyQueryString)(driver->deviceId, const_cast<char*>(data), reply, sizeof(reply));
+        res = (*ArbyQueryString)(driver->deviceId, const_cast<char*>(data), reply, sizeof(reply) - 1);
+        printf("in write after arbquery read back status %d \"%s\"\n", res, reply);
         if (res) {
-            driver->replyData = reply;
+            driver->replyData = std::string(reply);
             driver->replyData += driver->fakeReadTerminator;
         }
     }
@@ -215,6 +212,8 @@ static asynStatus writeIt(void *drvPvt, asynUser *pasynUser,
     driver->nWriteBytes += actual;
     *nbytesTransfered = actual;
 	epicsTimeGetCurrent(&epicsTS2);
+    asynPrintIO(pasynUser, ASYN_TRACEIO_DRIVER, data, actual,
+                   "%s wrote %d\n", driver->portName, actual);
     asynPrint(pasynUser, ASYN_TRACE_FLOW,
               "wrote %lu/%lu chars to %s, return %s.\n", (unsigned long)*nbytesTransfered, (unsigned long)numchars,
                                                driver->portName,
@@ -250,27 +249,19 @@ static asynStatus readIt(void *drvPvt, asynUser *pasynUser,
         return asynError;
     }
     data[0] = '\0';
-//    if (driver->replyData.size() == 0)
-//    {
-//			closeConnection(pasynUser, driver, "Read error");
-//			epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
-//				"%s read error", driver->portName);
-//			return asynError;
-//    }
-
     strncpy(data, driver->replyData.c_str(), maxchars);
     size_t actual = strlen(data);
     driver->replyData.erase(0, actual);
-		asynPrint(pasynUser, ASYN_TRACE_FLOW,
-			"read %lu from %s, return %s.\n", (unsigned long)*nbytesTransfered,
-			driver->portName,
-			pasynManager->strStatus(status));
 	if (actual > 0)
 	{
         asynPrintIO(pasynUser, ASYN_TRACEIO_DRIVER, data, actual,
                    "%s read %d\n", driver->portName, actual);
         driver->nReadBytes += (unsigned long)actual;
     }
+	else
+	{
+		status = asynTimeout;
+	}
     *nbytesTransfered = actual;
     /* If there is room add a null byte */
     if (actual < (int) maxchars)
@@ -354,7 +345,7 @@ drvAsynInstronArbyConfigure(const char *portName,
     if (fakeReadTerminator != NULL) {
        char termChar[16];
         epicsStrnRawFromEscaped(termChar, sizeof(termChar), fakeReadTerminator, strlen(fakeReadTerminator));
-        driver->fakeReadTerminator = termChar;
+        driver->fakeReadTerminator = std::string(termChar);
     }
     driver->pasynUser = pasynManager->createAsynUser(0,0);
 
