@@ -62,7 +62,6 @@ closeConnection(asynUser *pasynUser, instronDriver_t *driver, const char* reason
         return asynError;
     }
     driver->connected = false;
-	driver->deviceId = -1;
 	pasynManager->exceptionDisconnect(pasynUser);
     return asynSuccess;
 }
@@ -251,13 +250,13 @@ static asynStatus readIt(void *drvPvt, asynUser *pasynUser,
         return asynError;
     }
     data[0] = '\0';
-    if (driver->replyData.size() == 0)
-    {
-			closeConnection(pasynUser, driver, "Read error");
-			epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
-				"%s read error", driver->portName);
-			return asynError;
-    }
+//    if (driver->replyData.size() == 0)
+//    {
+//			closeConnection(pasynUser, driver, "Read error");
+//			epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
+//				"%s read error", driver->portName);
+//			return asynError;
+//    }
 
     strncpy(data, driver->replyData.c_str(), maxchars);
     size_t actual = strlen(data);
