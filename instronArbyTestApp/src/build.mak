@@ -26,7 +26,7 @@ $(APPNAME)_DBD += instronArby.dbd
 $(APPNAME)_DBD += stream.dbd
 
 # Add all the support libraries needed by this IOC
-$(APPNAME)_LIBS += stream instronArby asyn calc
+$(APPNAME)_LIBS += stream instronArby asyn calc sscan
 ifdef PCRE
 $(APPNAME)_LIBS += pcre
 endif
