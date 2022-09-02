@@ -190,9 +190,7 @@ static asynStatus writeIt(void *drvPvt, asynUser *pasynUser,
 	}
     BOOL res;
     size_t actual = numchars;
-    if (data[0] == 'C') {
-        res = (*ArbySendString)(driver->deviceId, const_cast<char*>(data));
-    } else {
+    if (data[0] == 'Q') {
         char reply[256];
         memset(reply, 0, sizeof(reply));
         res = (*ArbyQueryString)(driver->deviceId, const_cast<char*>(data), reply, sizeof(reply) - 1);
@@ -201,6 +199,8 @@ static asynStatus writeIt(void *drvPvt, asynUser *pasynUser,
             driver->replyData = std::string(reply);
             driver->replyData += driver->fakeReadTerminator;
         }
+    } else {	    
+	    res = (*ArbySendString)(driver->deviceId, const_cast<char*>(data));
     }
     if (res == 0)
     {
