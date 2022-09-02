@@ -1,4 +1,4 @@
-/// @file drvAsynInstronArby.cpp ASYN driver for National Instruments VISA 
+/// @file drvAsynInstronArby.cpp ASYN driver for Instron Arby interface 
 
 #include <windows.h>
 
@@ -38,7 +38,7 @@ typedef struct {
     asynUser          *pasynUser; 
     char              *portName;  ///< asyn port name
 	bool               connected;  ///< are we currently connected 
-    int                deviceId; ///< VISA resource name session connected to 
+    int                deviceId; ///< instron device id 
     unsigned long      nReadBytes;  ///< number of bytes read from this resource name
     unsigned long      nWriteBytes; ///< number of bytes written to this resource
     unsigned long      nReadCalls;  ///< number of read calls from this resource name
@@ -50,7 +50,7 @@ typedef struct {
 } instronDriver_t;
 
 
-/// close a VISA session
+/// close session
 static asynStatus
 closeConnection(asynUser *pasynUser, instronDriver_t *driver, const char* reason)
 {
@@ -194,13 +194,13 @@ static asynStatus writeIt(void *drvPvt, asynUser *pasynUser,
         char reply[256];
         memset(reply, 0, sizeof(reply));
         res = (*ArbyQueryString)(driver->deviceId, const_cast<char*>(data), reply, sizeof(reply) - 1);
-        printf("in write after arbquery read back status %d \"%s\"\n", res, reply);
         if (res) {
+            // assigning string directly to char* caused issue on first execution!
             driver->replyData = std::string(reply);
             driver->replyData += driver->fakeReadTerminator;
         }
-    } else {	    
-	    res = (*ArbySendString)(driver->deviceId, const_cast<char*>(data));
+    } else {    
+        res = (*ArbySendString)(driver->deviceId, const_cast<char*>(data));
     }
     if (res == 0)
     {
@@ -295,15 +295,13 @@ static const struct asynCommon asynCommonMethods = {
 };
 
 
-/// Create a VISA device.
+/// Create  device.
 /// @param[in] portName @copydoc drvAsynInstronArbyConfigureArg0
 /// @param[in] portName @copydoc drvAsynInstronArbyConfigureArg1
-/// @param[in] priority @copydoc drvAsynInstronArbyConfigureArg2
-/// @param[in] noAutoConnect @copydoc drvAsynInstronArbyConfigureArg3
-/// @param[in] noProcessEos @copydoc drvAsynInstronArbyConfigureArg4
-/// @param[in] readIntTmoMs @copydoc drvAsynInstronArbyConfigureArg5
-/// @param[in] termCharIn @copydoc drvAsynInstronArbyConfigureArg6
-/// @param[in] deviceSendsEOM @copydoc drvAsynInstronArbyConfigureArg7
+/// @param[in] fakeReadTerminator @copydoc drvAsynInstronArbyConfigureArg2
+/// @param[in] priority @copydoc drvAsynInstronArbyConfigureArg3
+/// @param[in] noAutoConnect @copydoc drvAsynInstronArbyConfigureArg4
+/// @param[in] noProcessEos @copydoc drvAsynInstronArbyConfigureArg5
 epicsShareFunc int
 drvAsynInstronArbyConfigure(const char *portName,
                          int deviceId, 
@@ -324,7 +322,7 @@ drvAsynInstronArbyConfigure(const char *portName,
         return -1;
     }
     if (deviceId < 0) {
-        printf("drvAsynInstronArbyConfigure: portName information missing.\n");
+        printf("drvAsynInstronArbyConfigure: deviceId information missing.\n");
         return -1;
     }
 
@@ -345,6 +343,7 @@ drvAsynInstronArbyConfigure(const char *portName,
     if (fakeReadTerminator != NULL) {
        char termChar[16];
         epicsStrnRawFromEscaped(termChar, sizeof(termChar), fakeReadTerminator, strlen(fakeReadTerminator));
+        // assigning string directly to char* caused issue on first execution!
         driver->fakeReadTerminator = std::string(termChar);
     }
     driver->pasynUser = pasynManager->createAsynUser(0,0);
@@ -402,7 +401,7 @@ drvAsynInstronArbyConfigure(const char *portName,
 
 /// A name for the asyn driver instance we will create e.g. "L0" 
 static const iocshArg drvAsynInstronArbyConfigureArg0 = { "portName",iocshArgString}; 
-/// VISA resource name to connect to e.g. "GPIB0::3::INSTR" or "COM10"
+/// instron device id
 static const iocshArg drvAsynInstronArbyConfigureArg1 = { "deviceId",iocshArgInt};
 static const iocshArg drvAsynInstronArbyConfigureArg2 = { "fakeReadTerminator",iocshArgString};
 /// Driver priority 
