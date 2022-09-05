@@ -3,6 +3,8 @@
 #
 # Empirically, these timeouts appear to be enough to overcome the "hang"...
 #
+# These hangs appear to be worse on Arby than they were under GPIB - hence needing very long timeouts here.
+#
 ReadTimeout = 10000;
 ReplyTimeout = 10000;
 WriteTimeout = 10000;
