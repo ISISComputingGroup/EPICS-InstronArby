@@ -1,0 +1,274 @@
+#
+# The stress rig appears to occasionally "hang" for a fair amount of time.
+#
+# Empirically, these timeouts appear to be enough to overcome the "hang"...
+#
+ReadTimeout = 10000;
+ReplyTimeout = 10000;
+WriteTimeout = 10000;
+LockTimeout = 25000;
+
+# Fake read terminator from Arby, not actually sent by device
+InTerminator = CR LF;
+
+#
+# Individual commands
+#
+
+getCurrentControlChannel {
+    out "Q300";
+	in "%d";
+}
+
+getWatchdogStatus {
+    out "Q904";
+	in "%d%*s";
+}
+
+disableWatchdog {
+    out "C904,0";
+}
+
+getControlMode {
+    out "Q909";
+	in "%d";
+}
+
+setControlMode {
+	out "P909,%d";
+}
+
+setControlModeCom {
+    out "P909,1";
+	disableWatchdog;
+}
+
+setControlModeFp {
+    out "P909,0";
+}
+
+getStatus {
+    out "Q22";
+    in "%d";
+}
+
+getActuatorStatus {
+    out "Q23";
+	in "%d";
+}
+
+getMovementType {
+    out "Q1";
+	in "%d";
+}
+
+#
+# Blocks of commands
+#
+
+initRoutine {
+    setControlModeCom;
+    # setControlModeFp;
+}
+
+panicStop {
+    # setControlModeCom;
+    out "C23,0";
+    # setControlModeFp;
+}
+
+setMovementType {
+    # setControlModeCom;
+	out "C1,%d";
+    # setControlModeFp;
+}
+
+stopAndStartMovement {
+    # setControlModeCom;
+    out "C1,0";
+    out "C1,1";
+    # setControlModeFp;
+}
+
+arbRW {
+    # setControlModeCom;
+    out "%(\$1.VAL)s";  
+    in "%39c";
+    # setControlModeFp;
+}
+
+setCurrentControlChannel {
+    # setControlModeCom;
+    out "C300,%d";
+    # setControlModeFp;
+	# @init { getCurrentControlChannel; }
+}
+
+setStepTime {
+    # setControlModeCom;
+    out "C86,\$1,%f";
+    # setControlModeFp;
+}
+
+getStepTime {
+    out "Q86,\$1";
+    in "%f";
+}
+
+setChanWaveType {
+    # setControlModeCom;
+    out "C2,\$1,%d";
+    # setControlModeFp;
+}
+
+getChanWaveType {
+    out "Q2,\$1";
+    in "%d";
+}
+
+getRampAmpSP {
+    out "Q4,\$1";
+    in "%f";
+}
+
+setRampAmpSP {
+    # setControlModeCom;
+    out "C4,\$1,%f";
+    # setControlModeFp;
+}
+
+getCurrentFeedback {
+    out "Q134,\$1,0";
+    in "%f";
+}
+
+getChanScale {
+    out "Q308,\$1";
+    in "%f";
+}
+
+getStrainLength {
+    out "Q340,\$1";
+    in "%f";
+}
+
+setArea {
+    # setControlModeCom;
+    out "C341,\$1,%f";
+    # setControlModeFp;
+}
+
+getArea {
+    out "Q341,\$1";
+    in "%f";
+}
+
+getType {
+    out "Q307,\$1";
+    in "%(\$2:TYPE:STANDARD)d,%d"
+}
+
+#
+# Waveform commands
+#
+
+getWaveformStatus {
+    out "Q200";
+    in "%d";
+}
+
+setWaveformAbort {
+    # setControlModeCom;
+    out "C200,0";
+    # setControlModeFp;
+}
+
+setWaveformStart {
+    # setControlModeCom;
+    out "C200,1";
+    # setControlModeFp;
+}
+
+setWaveformStop {
+    # setControlModeCom;
+    out "C200,4";
+    # setControlModeFp;
+}
+
+setWaveformAmplitude {
+    # setControlModeCom;
+    out "C203,%(\$1.RVAL)d,%.10f";
+    # setControlModeFp;
+}
+
+getWaveformAmplitude {
+    out "Q203,%(\$1.RVAL)d";
+	in "%f";
+}
+
+setWaveformFrequency {
+    # setControlModeCom;
+    out "C202,%(\$1.RVAL)d,%f";
+    # setControlModeFp;
+}
+
+getWaveformFrequency {
+    out "Q202,%(\$1.RVAL)d";
+	in "%f";
+}
+
+setWaveformType {
+    # setControlModeCom;
+    out "C201,%(\$1.RVAL)d,%d";
+    # setControlModeFp;
+}
+
+getWaveformType {
+    out "Q201,%(\$1.RVAL)d";
+	in "%d";
+}
+
+setWaveformQuartOff {
+    # setControlModeCom;
+    out "C212,0";
+    # setControlModeFp;
+}
+
+getQuartCountsMax {
+    out "Q209";
+	in "%d";
+}
+
+setQuartCountsMax {
+    # setControlModeCom;
+    out "C209,%d";
+    # setControlModeFp;
+}
+
+getQuartCounts {
+    out "Q210";
+	in "%d";
+}
+
+setWaveformHold {
+    # setControlModeCom;
+    out "C213,3";
+    # setControlModeFp;
+}
+
+setLogMaintain {
+    # setControlModeCom;
+    out "C214,0";
+    # setControlModeFp;
+}
+
+setWaveformQuartArm {
+    # setControlModeCom;
+    out "C212,2";
+    # setControlModeFp;
+}
+
+getWaveformQuartStatus {
+    out "Q212";
+	in "%d";
+}
