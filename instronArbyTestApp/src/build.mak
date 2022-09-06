@@ -1,4 +1,4 @@
-## @file build.mak Makefile for VISADrvTest
+## @file build.mak Makefile for InstronArbyTest
 
 TOP=../..
 
@@ -10,14 +10,14 @@ include $(TOP)/configure/CONFIG
 ### NOTE: there should only be one build.mak for a given IOC family and this should be located in the ###-IOC-01 directory
 
 #=============================
-# Build the IOC application VISAdrvTest
+# Build the IOC application InstronArbyTest
 # We actually use $(APPNAME) below so this file can be included by multiple IOCs
 
 PROD_IOC = $(APPNAME)
-# VISAdrvTest.dbd will be created and installed
+# InstronArbyTest.dbd will be created and installed
 DBD += $(APPNAME).dbd
 
-# VISAdrvTest.dbd will be made up from these files:
+# InstronArbyTest.dbd will be made up from these files:
 $(APPNAME)_DBD += base.dbd
 $(APPNAME)_DBD += calcSupport.dbd
 $(APPNAME)_DBD += asyn.dbd
@@ -32,7 +32,7 @@ $(APPNAME)_LIBS += pcre
 endif
 
 
-# VISAdrvTest_registerRecordDeviceDriver.cpp derives from VISAdrvTest.dbd
+# InstronArbyTest_registerRecordDeviceDriver.cpp derives from InstronArbyTest.dbd
 $(APPNAME)_SRCS += $(APPNAME)_registerRecordDeviceDriver.cpp
 
 # Build the main IOC entry point on workstation OSs.

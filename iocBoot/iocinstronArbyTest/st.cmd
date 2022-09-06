@@ -1,8 +1,6 @@
-## @file st.cmd Example VISAdrv program
+#!../../bin/windows-x64/instronArbyTest
 
-#!../../bin/windows-x64/VISAdrvTest
-
-## You may have to change VISAdrvTest to something else
+## You may have to change instronArbyTest to something else
 ## everywhere it appears in this file
 
 # Increase this if you get <<TRUNCATED>> or discarded messages warnings in your errlog output
