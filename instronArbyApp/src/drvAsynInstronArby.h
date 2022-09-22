@@ -1,4 +1,4 @@
-/// @file drvAsynVISAPort.h ASYN driver for National Instruments VISA 
+/// @file drvAsynInstronArby.h ASYN driver for Instron Arby interface 
 
 #ifndef DRVASYNINSTRONARBY_H
 #define DRVASYNINSTRONARBY_H
