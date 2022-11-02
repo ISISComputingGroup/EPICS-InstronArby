@@ -167,8 +167,8 @@ static asynStatus writeIt(void *drvPvt, asynUser *pasynUser,
     const char *data, size_t numchars, size_t *nbytesTransfered)
 {
 	static HMODULE hArby = LoadLibrary("Arby.dll");
-    static ArbySendString_t ArbySendString = (ArbySendString_t)GetProcAddress(hArby, "Arby_SendString");
-    static ArbyQueryString_t ArbyQueryString = (ArbyQueryString_t)GetProcAddress(hArby, "Arby_QueryString");
+    static ArbySendString_t ArbySendString = (hArby != NULL ? (ArbySendString_t)GetProcAddress(hArby, "Arby_SendString") : NULL);
+    static ArbyQueryString_t ArbyQueryString = (hArby != NULL ? (ArbyQueryString_t)GetProcAddress(hArby, "Arby_QueryString") : NULL);
     instronDriver_t *driver = (instronDriver_t*)drvPvt;
     asynStatus status = asynSuccess;
 	epicsTimeStamp epicsTS1, epicsTS2;
@@ -188,6 +188,12 @@ static asynStatus writeIt(void *drvPvt, asynUser *pasynUser,
 	{
         return asynSuccess;
 	}
+    if (ArbySendString == NULL || ArbyQueryString == NULL)
+    {
+         epicsSnprintf(pasynUser->errorMessage,pasynUser->errorMessageSize,
+                       "%s Arby.dll commands NULL", driver->portName);
+         return asynError;
+    }
     BOOL res;
     size_t actual = numchars;
     if (data[0] == 'Q') {
