@@ -3,9 +3,11 @@ include $(TOP)/configure/CONFIG
 #----------------------------------------
 #  ADD MACRO DEFINITIONS AFTER THIS LINE
 
-#----------------------------------------------------
-#  Optimization of db files using dbst (DEFAULT: NO)
-#DB_OPT = YES
+DB += controls.db 
+DB += controls_channel.db 
+DB += controls_channel_specific.db
+DB += controls_waveform.db
+DB += logging.db
 
 #----------------------------------------------------
 # Create and install (or just install) into <top>/db
