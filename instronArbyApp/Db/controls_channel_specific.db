@@ -2,7 +2,7 @@
 ### General records
 ###
 
-record(seq, "$(P)CONTROLS:SPECIFIC:READALL")
+record(fanout, "$(P)CONTROLS:SPECIFIC:READALL")
 {
     # Watchdog must already be disabled
     # Called from main read all

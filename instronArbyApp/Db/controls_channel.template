@@ -9,7 +9,7 @@
 # ST_PREFIX - prefix of mbbi record in channel pv for this channel
 
 
-record(seq, "$(P)$(CHAN):READALL")
+record(fanout, "$(P)$(CHAN):READALL")
 {
     field(DESC, "Read data from $(CHAN) channel")
     
