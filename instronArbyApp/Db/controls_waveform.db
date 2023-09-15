@@ -1,4 +1,4 @@
-record(seq, "$(P)WAVE:READALL") 
+record(fanout, "$(P)WAVE:READALL")
 {
     field(DESC, "Read all waveform data")
     field(LNK1, "$(P)WAVE:FREQ:RAW PP")

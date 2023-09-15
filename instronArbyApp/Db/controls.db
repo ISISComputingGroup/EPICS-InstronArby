@@ -150,7 +150,7 @@ record(bo, "$(P)INIT")
 record(seq, "$(P)INITSEQ")
 {
     field(DESC, "Initialize comms")   
-    field(LNK1, "$(P)READ_VAR PP")
+    field(LNK1, "$(P)READ_VAR.PROC PP")
     
     field(DO2, "3")
     field(LNK2, "$(P)AXES:RAMP:WFTYP:SP PP")
@@ -379,12 +379,12 @@ record(seq, "$(P)READ_SLOW")
     field(DO1, "0")
     field(LNK1, "$(P)WATCHDOG:STAT:SP PP")
     
-    field(LNK2, "$(P)MOVE PP")
-    field(LNK3, "$(P)STAT:FRAME PP")
-    field(LNK4, "$(P)CHANNEL:RAW PP")
+    field(LNK2, "$(P)MOVE.PROC PP")
+    field(LNK3, "$(P)STAT:FRAME.PROC PP")
+    field(LNK4, "$(P)CHANNEL:RAW.PROC PP")
 
-    field(LNK5, "$(P)CONTROLS:SPECIFIC:READALL PP")
-	field(LNK6, "$(P)WAVE:READALL PP")
+    field(LNK5, "$(P)CONTROLS:SPECIFIC:READALL.PROC PP")
+	field(LNK6, "$(P)WAVE:READALL.PROC PP")
     
     field(SCAN, "1 second")
     field(SELM, "All")
@@ -398,11 +398,11 @@ record(seq, "$(P)READ_VAR")
     field(DO1, "0")
     field(LNK1, "$(P)WATCHDOG:STAT:SP PP")
 	
-    field(LNK2, "$(P)POS:READALL PP")
-    field(LNK3, "$(P)STRESS:READALL PP")
-    field(LNK4, "$(P)STRAIN:READALL PP")
+    field(LNK2, "$(P)POS:READALL.PROC PP")
+    field(LNK3, "$(P)STRESS:READALL.PROC PP")
+    field(LNK4, "$(P)STRAIN:READALL.PROC PP")
 	
-    field(LNK5, "$(P)READ_VAR:COUNT:_CALC PP")
+    field(LNK5, "$(P)READ_VAR:COUNT:_CALC.PROC PP")
     
     field(SCAN, "1 second")
     field(SELM, "All")
