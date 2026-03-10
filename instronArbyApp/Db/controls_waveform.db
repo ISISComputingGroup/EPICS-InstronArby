@@ -527,6 +527,7 @@ record(ao, "$(P)QUART:CYCLE:SP")
     field(EGU, "")
     field(FLNK, "$(P)QUART:SP:_CALC")
     field(VAL, "0")
+    field(DRVH, "536870912") # 2^29
     field(PINI, "YES")
 }
 
