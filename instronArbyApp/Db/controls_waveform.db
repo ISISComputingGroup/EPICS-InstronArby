@@ -345,7 +345,8 @@ record(calcout, "$(P)WAVE:AMP:_CALC") {
     field(INPE, "$(P)STRESS:AREA CA")
     field(INPF, "$(P)STRAIN:SCALE CA")
     field(INPG, "$(P)STRAIN:LENGTH CA")
-    field(CALC, "A==1?B/C/1000:A==2?B*E/D:B/F/G/100000")
+    # field(CALC, "A==1?B/C/1000:A==2?B*E/D:B/F/G/100000")
+    field(CALC, "A==1?B/C/1000:A==2?B*E/D:B*G/F/100000")
     field(OUT,  "$(P)WAVE:AMP:SP:_RAW PP")
 }
 
@@ -417,7 +418,8 @@ record(calcout, "$(P)WAVE:AMP:SP:RBV:_CALC") {
     field(INPE, "$(P)STRESS:AREA CA MS")
     field(INPF, "$(P)STRAIN:SCALE CA MS")
     field(INPG, "$(P)STRAIN:LENGTH CA MS")
-    field(CALC, "A==1?B*C*1000:A==2?B*D/E:B*F*G*100000")
+    # field(CALC, "A==1?B*C*1000:A==2?B*D/E:B*F*G*100000")
+    field(CALC, "A==1?B*C*1000:A==2?B*D/E:(B*F/G)*100000")
     field(OUT,  "$(P)WAVE:AMP:SP:RBV PP MS")
 }
 
